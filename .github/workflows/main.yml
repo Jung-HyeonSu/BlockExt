@@ -3,44 +3,40 @@ name: Deploy BlockExt to EC2
 on:
   push:
     branches:
-      - main
+      - main   # main 브랜치 푸시 시 실행
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Copy project to EC2
-      uses: appleboy/scp-action@v0.1.4
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USER }}
-        key: ${{ secrets.EC2_SSH_KEY }}
-        source: "."
-        target: "/home/ec2-user/blockext"
+      - name: Copy project to EC2
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "."
+          target: "/home/ec2-user/blockext"
 
-    - name: Deploy on EC2
-      uses: appleboy/ssh-action@v0.1.6
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USER }}
-        key: ${{ secrets.EC2_SSH_KEY }}
-        script: |
-          # 백엔드
-          cd /home/ec2-user/blockext/BlockExt/backend
-          chmod +x gradlew
-          ./gradlew build -x test
-          pkill -f "blockext-0.0.1-SNAPSHOT.jar" || true
-          nohup java -jar build/libs/blockext-0.0.1-SNAPSHOT.jar > backend.log 2>&1 &
+      - name: Deploy on EC2
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # 백엔드 빌드 및 서비스 재시작
+            cd /home/ec2-user/blockext/BlockExt/backend
+            chmod +x gradlew
+            ./gradlew build -x test
+            sudo systemctl restart backend
 
-          # 프론트엔드
-          cd /home/ec2-user/blockext/BlockExt/frontend
-          npm install
-          npm run build
-          # serve 설치 및 정적 파일 서빙
-          npm install -g serve
-          pkill -f "serve -s build" || true
-          nohup serve -s build -l 3000 > frontend.log 2>&1 &
+            # 프론트엔드 빌드 및 서비스 재시작
+            cd /home/ec2-user/blockext/BlockExt/frontend
+            npm install
+            npm run build
+            sudo systemctl restart frontend
