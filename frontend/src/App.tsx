@@ -18,6 +18,14 @@ function App() {
   const [fixedBlocked, setFixedBlockedState] = useState<{[name:string]: boolean}>({});
   const [customExts, setCustomExts] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [fileName, setFileName] = useState<string>('');
+  const [uploadMsg, setUploadMsg] = useState<string>('');
+
+  // 차단된 확장자 목록(고정+커스텀)
+  const blockedExtensions = [
+    ...fixedExts.filter(name => fixedBlocked[name]),
+    ...customExts
+  ];
 
   useEffect(() => {
     fetchFixedExtensions().then((data) => {
@@ -69,6 +77,22 @@ function App() {
     setLoading(false);
   };
 
+  // 파일 첨부 테스트 핸들러
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const ext = file.name.split('.').pop()?.toLowerCase() || '';
+    setFileName(file.name);
+
+    if (blockedExtensions.includes(ext)) {
+      setUploadMsg(`'${ext}' 확장자는 첨부할 수 없습니다.`);
+      alert(`'${ext}' 확장자는 첨부할 수 없습니다.`);
+      event.target.value = '';  // 첨부 취소
+      return;
+    }
+    setUploadMsg(`파일 "${file.name}" 첨부 성공! (확장자: ${ext})`);
+  };
+
   return (
     <div>
       <div className="main-panel">
@@ -103,6 +127,29 @@ function App() {
             </tr>
           </tbody>
         </table>
+
+        <div style={{
+          marginTop: '42px', padding: '20px 0 0 0', borderTop: '1px solid #ececec'
+        }}>
+          <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '10px', color: '#222' }}>
+            파일 첨부 테스트
+          </div>
+          <input
+            type="file"
+            onChange={handleFileChange}
+            style={{
+              border: '1px solid #d1d5db',
+              borderRadius: '5px',
+              padding: '6px',
+              fontSize: '15px',
+              background: '#fafbfc',
+              marginBottom: '12px'
+            }}
+          />
+          <div style={{ fontSize: '15px', color: '#2977f5', marginTop: '3px' }}>
+            {uploadMsg}
+          </div>
+        </div>
       </div>
     </div>
   );
