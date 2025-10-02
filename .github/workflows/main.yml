@@ -3,7 +3,7 @@ name: Deploy BlockExt to EC2
 on:
   push:
     branches:
-      - main
+      - main   # main 브랜치 푸시 시 실행
 
 jobs:
   deploy:
@@ -19,45 +19,35 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "."                     # 전체 프로젝트
+          source: "."
           target: "/home/ec2-user/blockext"
 
-      - name: Build & Deploy Backend on EC2
+      - name: Deploy on EC2
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            set -e
             cd /home/ec2-user/blockext/BlockExt/backend
-
-            # 기존 빌드 삭제
-            rm -f build/libs/*.jar
-
-            # 최신 빌드 생성
-            chmod +x gradlew
-            ./gradlew clean build -x test
-
-            # 서비스 재시작
+            echo "Cleaning previous build..."
+            ./gradlew clean
+            echo "Building backend..."
+            ./gradlew build -x test
+            echo "Restarting backend service..."
             sudo systemctl restart backend
             sudo systemctl status backend --no-pager
 
-      - name: Build & Deploy Frontend on EC2
-        uses: appleboy/ssh-action@v0.1.6
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
             cd /home/ec2-user/blockext/BlockExt/frontend
-
-            # node_modules 삭제 후 재설치
-            rm -rf node_modules
+            echo "Cleaning previous frontend build..."
+            rm -rf build node_modules
+            echo "Installing dependencies..."
             npm install
-
-            # 최신 빌드 생성
+            echo "Building frontend..."
             npm run build
-
-            # 서비스 재시작
+            echo "Restarting frontend service..."
             sudo systemctl restart frontend
             sudo systemctl status frontend --no-pager
+
+            echo "Deployment complete!"
