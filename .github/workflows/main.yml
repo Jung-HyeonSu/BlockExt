@@ -19,10 +19,10 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "."
+          source: "."                     # 전체 프로젝트
           target: "/home/ec2-user/blockext"
 
-      - name: Deploy on EC2
+      - name: Build & Deploy Backend on EC2
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -30,12 +30,34 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd /home/ec2-user/blockext/BlockExt/backend
-            chmod +x gradlew
-            ./gradlew clean build -x test   # 기존 빌드 삭제 + 새 빌드
-            sudo systemctl restart backend   # 백엔드 서비스 재시작
 
+            # 기존 빌드 삭제
+            rm -f build/libs/*.jar
+
+            # 최신 빌드 생성
+            chmod +x gradlew
+            ./gradlew clean build -x test
+
+            # 서비스 재시작
+            sudo systemctl restart backend
+            sudo systemctl status backend --no-pager
+
+      - name: Build & Deploy Frontend on EC2
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
             cd /home/ec2-user/blockext/BlockExt/frontend
-            rm -rf build                    # 기존 빌드 삭제
+
+            # node_modules 삭제 후 재설치
+            rm -rf node_modules
             npm install
+
+            # 최신 빌드 생성
             npm run build
-            sudo systemctl restart frontend  # 프론트엔드 서비스 재시작
+
+            # 서비스 재시작
+            sudo systemctl restart frontend
+            sudo systemctl status frontend --no-pager
