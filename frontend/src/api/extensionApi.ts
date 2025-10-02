@@ -1,6 +1,33 @@
-// 확장자 저장/불러오기 API 스텁
-export const saveExtensions = async (fixed: string[], custom: string[]) => {
-  // POST /api/extensions
-  // 실제 API 연동 시 구현
-  return { success: true };
-};
+const BASE_URL = "http://localhost:8080/api/extensions";
+
+// 고정 확장자 전체 조회
+export async function fetchFixedExtensions(): Promise<{name:string, blocked:boolean}[]> {
+  const res = await fetch(`${BASE_URL}/fixed`);
+  return res.json();
+}
+
+// 커스텀 확장자 전체 조회
+export async function fetchCustomExtensions(): Promise<{name:string}[]> {
+  const res = await fetch(`${BASE_URL}/custom`);
+  return res.json();
+}
+
+// 고정 확장자 차단/해제 변경
+export async function setFixedBlocked(name: string, blocked: boolean) {
+  const url = `${BASE_URL}/fixed/${encodeURIComponent(name)}/block?blocked=${blocked}`;
+  const res = await fetch(url, { method: "POST" });
+  return res.json();
+}
+
+// 커스텀 확장자 추가
+export async function addCustomExtension(name: string) {
+  const url = `${BASE_URL}/custom?name=${encodeURIComponent(name)}`;
+  const res = await fetch(url, { method: "POST" });
+  return res.json();
+}
+
+// 커스텀 확장자 삭제
+export async function deleteCustomExtension(name: string) {
+  const url = `${BASE_URL}/custom/${encodeURIComponent(name)}`;
+  await fetch(url, { method: "DELETE" });
+}

@@ -1,25 +1,77 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import FixedExtensions from './components/FixedExtensions';
 import CustomExtensions from './components/CustomExtensions';
-import { saveExtensions } from './api/extensionApi';
-
-const DEFAULT_FIXED_EXTENSIONS = [
-  'bat', 'cmd', 'com', 'cpl', 'exe', 'scr', 'js'
-];
-
-const DEFAULT_CUSTOM_EXTENSIONS: string[] = [];
+import {
+  fetchFixedExtensions,
+  fetchCustomExtensions,
+  setFixedBlocked,
+  addCustomExtension,
+  deleteCustomExtension
+} from './api/extensionApi';
 
 function App() {
   const [fixedExts, setFixedExts] = useState<string[]>([]);
-  const [customExts, setCustomExts] = useState<string[]>(DEFAULT_CUSTOM_EXTENSIONS);
+  const [fixedBlocked, setFixedBlockedState] = useState<{[name:string]: boolean}>({});
+  const [customExts, setCustomExts] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const handleSave = async () => {
+  // 최초 렌더링 시 DB에서 목록 불러오기
+  useEffect(() => {
+    fetchFixedExtensions().then((data) => {
+      setFixedExts(data.map(item => item.name));
+      setFixedBlockedState(
+        Object.fromEntries(data.map(item => [item.name, item.blocked]))
+      );
+    });
+    fetchCustomExtensions().then((data) => {
+      setCustomExts(data.map(item => item.name));
+    });
+  }, []);
+
+  // 고정 확장자 상태 변경 시 서버에 반영
+  const handleFixedChange = async (selected: string[]) => {
     setLoading(true);
-    await saveExtensions(fixedExts, customExts);
+
+    // 체크된 확장자 -> blocked = true, 체크 해제된 확장자 -> blocked = false
+    for (const name of fixedExts) {
+      const shouldBlock = selected.includes(name);
+      if (fixedBlocked[name] !== shouldBlock) {
+        await setFixedBlocked(name, shouldBlock);
+      }
+    }
+
+    // 최신 blocked 상태 다시 불러오기
+    fetchFixedExtensions().then((data) => {
+      setFixedExts(data.map(item => item.name));
+      setFixedBlockedState(
+        Object.fromEntries(data.map(item => [item.name, item.blocked]))
+      );
+    });
     setLoading(false);
-    alert('저장되었습니다.');
+  };
+
+  // 커스텀 확장자 추가
+  const handleAddCustom = async (newExts: string[]) => {
+    setLoading(true);
+    const toAdd = newExts.filter(ext => !customExts.includes(ext));
+    for (const ext of toAdd) {
+      await addCustomExtension(ext);
+    }
+    fetchCustomExtensions().then((data) => {
+      setCustomExts(data.map(item => item.name));
+    });
+    setLoading(false);
+  };
+
+  // 커스텀 확장자 삭제
+  const handleRemoveCustom = async (toRemove: string) => {
+    setLoading(true);
+    await deleteCustomExtension(toRemove);
+    fetchCustomExtensions().then((data) => {
+      setCustomExts(data.map(item => item.name));
+    });
+    setLoading(false);
   };
 
   return (
@@ -35,30 +87,24 @@ function App() {
               <th>고정 확장자</th>
               <td>
                 <FixedExtensions
-                  selected={fixedExts}
-                  onChange={setFixedExts}
-                  options={DEFAULT_FIXED_EXTENSIONS}
+                  selected={fixedExts.filter(name => fixedBlocked[name])}
+                  onChange={handleFixedChange}
+                  options={fixedExts}
                 />
               </td>
             </tr>
             <tr>
               <th>커스텀 확장자</th>
               <td>
-                <CustomExtensions extensions={customExts} onChange={setCustomExts} />
+                <CustomExtensions
+                  extensions={customExts}
+                  onChange={handleAddCustom}
+                  onRemove={handleRemoveCustom}
+                />
               </td>
             </tr>
           </tbody>
         </table>
-        <div className="btns">
-          <button className="button" onClick={handleSave} disabled={loading}>
-            저장
-          </button>
-          <button className="button cancel" onClick={() => window.location.reload()}>
-            취소
-          </button>
-        </div>
-        <div className="footer">
-        </div>
       </div>
     </div>
   );

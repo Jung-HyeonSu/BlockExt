@@ -3,6 +3,7 @@ import React, { useState, ChangeEvent, KeyboardEvent } from 'react';
 interface Props {
   extensions: string[];
   onChange: (exts: string[]) => void;
+  onRemove?: (ext: string) => void;
   placeholder?: string;
   maxLength?: number;
   addButtonText?: string;
@@ -16,6 +17,7 @@ const isValidExt = (ext: string, maxLength: number) =>
 const CustomExtensions: React.FC<Props> = ({
   extensions,
   onChange,
+  onRemove,
   placeholder = "확장자 입력",
   maxLength = DEFAULT_MAX_LENGTH,
   addButtonText = "+추가"
@@ -106,7 +108,7 @@ const CustomExtensions: React.FC<Props> = ({
             {ext}
             <button
               type="button"
-              onClick={() => handleRemove(ext)}
+              onClick={() => onRemove ? onRemove(ext) : onChange(extensions.filter(e => e !== ext))}
               aria-label={`${ext} 삭제`}
               style={{
                 background: 'none',

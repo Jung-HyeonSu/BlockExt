@@ -3,17 +3,13 @@ import React from 'react';
 interface Props {
   selected: string[];
   onChange: (selected: string[]) => void;
-  options?: string[];
+  options: string[];
 }
-
-const DEFAULT_FIXED_EXTENSIONS = [
-  'bat', 'cmd', 'com', 'cpl', 'exe', 'scr', 'js'
-];
 
 const FixedExtensions: React.FC<Props> = ({
   selected,
   onChange,
-  options = DEFAULT_FIXED_EXTENSIONS,
+  options,
 }) => {
   const handleCheck = (ext: string) => {
     if (selected.includes(ext)) {
