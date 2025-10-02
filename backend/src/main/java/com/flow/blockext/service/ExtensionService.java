@@ -7,7 +7,9 @@ import com.flow.blockext.repository.CustomExtensionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -44,5 +46,22 @@ public class ExtensionService {
         CustomExtension ext = customExtensionRepository.findByName(name)
                 .orElseThrow(() -> new IllegalArgumentException("Not found"));
         customExtensionRepository.delete(ext);
+    }
+
+    // 차단된 확장자와 사용자 정의 확장자를 모두 조회하여 소문자 리스트로 반환
+    public List<String> getBlockedExtensionNames() {
+        List<String> fixed = fixedExtensionRepository.findAll()
+            .stream().filter(FixedExtension::isBlocked)
+            .map(FixedExtension::getName)
+            .map(String::toLowerCase)
+            .collect(Collectors.toList());
+        List<String> custom = customExtensionRepository.findAll()
+            .stream().map(CustomExtension::getName)
+            .map(String::toLowerCase)
+            .collect(Collectors.toList());
+        List<String> all = new ArrayList<>();
+        all.addAll(fixed);
+        all.addAll(custom);
+        return all;
     }
 }
