@@ -1,7 +1,8 @@
-# Compiled class file
+# ================= Spring Boot / Java =================
+# Compiled class files
 *.class
 
-# Log file
+# Log files
 *.log
 
 # BlueJ files
@@ -10,15 +11,71 @@
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
-# Package Files #
+# Package Files
 *.jar
 *.war
-*.nar
 *.ear
+*.nar
 *.zip
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-replay_pid*
+# Maven / Gradle
+backend/target/
+backend/pom.xml.tag
+backend/pom.xml.releaseBackup
+backend/pom.xml.versionsBackup
+backend/pom.xml.next
+backend/release.properties
+backend/dependency-reduced-pom.xml
+backend/buildNumber.properties
+backend/.mvn/timing.properties
+!backend/.mvn/wrapper/maven-wrapper.jar
+
+# IDE / OS
+.idea/
+*.iml
+*.ipr
+*.iws
+*.classpath
+*.project
+.settings/
+*.DS_Store
+*.swp
+*.bak
+*.orig
+
+# ================= React / Node =================
+# Node modules
+frontend/node_modules/
+
+# Build output
+frontend/build/
+frontend/dist/
+
+# Environment variables
+frontend/.env
+
+# ================= Windows / Mac =================
+# Windows
+Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
+*.msi
+*.msix
+*.msm
+*.msp
+*.cab
+
+# Mac
+.DS_Store
+*.sw?
+*#
+*~ 
+
+# ================= VS Code =================
+.vscode/
