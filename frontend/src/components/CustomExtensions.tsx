@@ -4,12 +4,15 @@ interface Props {
   extensions: string[];
   onChange: (exts: string[]) => void;
   onRemove?: (ext: string) => void;
+  fixedExts?: string[];
   placeholder?: string;
   maxLength?: number;
+  maxCount?: number;
   addButtonText?: string;
 }
 
 const DEFAULT_MAX_LENGTH = 20;
+const DEFAULT_MAX_COUNT = 200;
 
 const isValidExt = (ext: string, maxLength: number) =>
   new RegExp(`^[a-zA-Z0-9.-]{1,${maxLength}}$`).test(ext);
@@ -18,8 +21,10 @@ const CustomExtensions: React.FC<Props> = ({
   extensions,
   onChange,
   onRemove,
+  fixedExts = [],
   placeholder = "확장자 입력",
   maxLength = DEFAULT_MAX_LENGTH,
+  maxCount = DEFAULT_MAX_COUNT,
   addButtonText = "+추가"
 }) => {
   const [input, setInput] = useState('');
@@ -28,16 +33,40 @@ const CustomExtensions: React.FC<Props> = ({
     setInput(e.target.value);
   };
 
+  // 커스텀 확장자 추가 버튼 클릭/엔터 입력 시
   const handleAdd = () => {
     const ext = input.trim();
-    if (ext && isValidExt(ext, maxLength) && !extensions.includes(ext)) {
-      onChange([...extensions, ext]);
-      setInput('');
-    }
-  };
 
-  const handleRemove = (ext: string) => {
-    onChange(extensions.filter(e => e !== ext));
+    if (!ext) return;
+
+    if (extensions.length >= maxCount) {
+      alert(`최대 ${maxCount}개까지만 추가할 수 있습니다.`);
+      return;
+    }
+
+    if (ext.length > maxLength) {
+      alert(`확장자는 최대 ${maxLength}자리까지 가능합니다.`);
+      return;
+    }
+
+    if (!isValidExt(ext, maxLength)) {
+      alert("확장자는 영문/숫자/점(.)/하이픈(-)만 허용됩니다.");
+      return;
+    }
+
+    if (extensions.includes(ext)) {
+      alert("이미 추가된 확장자입니다.");
+      return;
+    }
+
+    if (fixedExts.includes(ext)) {
+      alert("고정 확장자에 이미 포함된 확장자는 커스텀 확장자로 추가할 수 없습니다.");
+      return;
+    }
+
+    // 유효하면 추가
+    onChange([...extensions, ext]);
+    setInput('');
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -127,7 +156,7 @@ const CustomExtensions: React.FC<Props> = ({
         ))}
       </div>
       <div style={{ textAlign: 'right', fontSize: '12px', marginTop: '5px', color: '#222' }}>
-        {extensions.length}/200
+        {extensions.length}/{maxCount}
       </div>
     </div>
   );
