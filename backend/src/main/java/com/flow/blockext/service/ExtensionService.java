@@ -42,11 +42,12 @@ public class ExtensionService {
     // 커스텀 확장자 추가
     @Transactional
     public CustomExtension addCustomExtension(String name) {
-        if (customExtensionRepository.findByName(name).isPresent()) {
+        String lowerName = name.toLowerCase();
+        if (customExtensionRepository.findByName(lowerName).isPresent()) {
             throw new IllegalArgumentException("이미 존재하는 확장자입니다.");
         }
         try {
-            CustomExtension ext = CustomExtension.builder().name(name).build();
+            CustomExtension ext = CustomExtension.builder().name(lowerName).build();
             return customExtensionRepository.save(ext);
         } catch (DataIntegrityViolationException e) {
             // Unique 제약조건 위반 (동시 insert 시)
