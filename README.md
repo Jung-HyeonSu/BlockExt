@@ -37,3 +37,24 @@
 
 ## 4. CI/CD 배포 자동화 (GitHub Actions)
 BlockExt 프로젝트는 **GitHub Actions**를 활용해 EC2 서버에 **자동 배포**되도록 설정했습니다.
+
+## 5. ERD
+<img width="382" height="142" alt="image" src="https://github.com/user-attachments/assets/cbe451c0-8cf2-41cd-8289-700f061d662c" />
+
+## 6. API 명세
+
+### 6.1 고정 확장자 API
+
+| 메서드      | 엔드포인트                                                  | 설명              | 요청 파라미터                               | 응답 예시                                                                              |
+| -------- | ------------------------------------------------ | --------------- | ---------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| **GET**  | `/api/extensions/fixed`                                | 고정 확장자 전체 조회    | -                                     | `json [ { "name": "exe", "blocked": true }, { "name": "sh", "blocked": false } ] ` |
+| **POST** | `/api/extensions/fixed/{name}/block?blocked={boolean}` | 특정 고정 확장자 차단/해제 | `name`: 확장자명<br>`blocked`: true/false | `json { "name": "exe", "blocked": true } `                                         |
+
+### 6.2 커스텀 확장자 API
+
+| 메서드        | 엔드포인트                                | 설명            | 요청 파라미터      | 응답 예시                                            |
+| ---------- | ------------------------------------ | ------------- | ------------ | ------------------------------------------------ |
+| **GET**    | `/api/extensions/custom`             | 커스텀 확장자 전체 조회 | -            | `json [ { "name": "bat" }, { "name": "dll" } ] ` |
+| **POST**   | `/api/extensions/custom?name={name}` | 커스텀 확장자 추가    | `name`: 확장자명 | `json { "name": "bat" } `                        |
+| **DELETE** | `/api/extensions/custom/{name}`      | 커스텀 확장자 삭제    | `name`: 확장자명 | (응답 없음, 200 OK)                                  |
+
