@@ -33,7 +33,7 @@ public class ExtensionService {
 
     // 고정 확장자 차단/해제 변경
     public FixedExtension setFixedBlocked(String name, boolean blocked) {
-        FixedExtension ext = fixedExtensionRepository.findByName(name)
+        FixedExtension ext = fixedExtensionRepository.findByNameIgnoreCase(name)
                 .orElseThrow(() -> new IllegalArgumentException("Not found"));
         ext.setBlocked(blocked);
         return fixedExtensionRepository.save(ext);
@@ -43,9 +43,25 @@ public class ExtensionService {
     @Transactional
     public CustomExtension addCustomExtension(String name) {
         String lowerName = name.toLowerCase();
-        if (customExtensionRepository.findByName(lowerName).isPresent()) {
+
+        // 모든 기존 확장자를 소문자로 가져오기
+        List<String> existingExtensions = new ArrayList<>();
+        existingExtensions.addAll(
+                fixedExtensionRepository.findAll()
+                        .stream().map(f -> f.getName().toLowerCase())
+                        .toList()
+        );
+        existingExtensions.addAll(
+                customExtensionRepository.findAll()
+                        .stream().map(c -> c.getName().toLowerCase())
+                        .toList()
+        );
+
+        if (existingExtensions.contains(lowerName)) {
             throw new IllegalArgumentException("이미 존재하는 확장자입니다.");
         }
+
+        
         try {
             CustomExtension ext = CustomExtension.builder().name(lowerName).build();
             return customExtensionRepository.save(ext);
@@ -60,7 +76,7 @@ public class ExtensionService {
 
     // 커스텀 확장자 삭제
     public void deleteCustomExtension(String name) {
-        CustomExtension ext = customExtensionRepository.findByName(name)
+        CustomExtension ext = customExtensionRepository.findByNameIgnoreCase(name)
                 .orElseThrow(() -> new IllegalArgumentException("Not found"));
         customExtensionRepository.delete(ext);
     }

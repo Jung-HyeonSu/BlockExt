@@ -41,7 +41,7 @@ const CustomExtensions: React.FC<Props> = ({
     if (ext.length > maxLength) return `확장자는 최대 ${maxLength}자리까지 가능합니다.`;
     if (!isValidExt(ext, maxLength)) return "확장자는 영문/숫자/점(.)/하이픈(-)만 허용됩니다.";
     if (extensions.includes(ext)) return "이미 추가된 확장자입니다.";
-    if (fixedExts.includes(ext)) return "고정 확장자에 이미 포함된 확장자는 커스텀 확장자로 추가할 수 없습니다.";
+    if (fixedExts.map(f => f.toLowerCase()).includes(ext.toLowerCase()))  return "고정 확장자에 이미 포함된 확장자는 커스텀 확장자로 추가할 수 없습니다.";
     return null;
   };
 
