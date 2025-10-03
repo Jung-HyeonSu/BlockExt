@@ -5,7 +5,11 @@ import com.flow.blockext.entity.CustomExtension;
 import com.flow.blockext.repository.FixedExtensionRepository;
 import com.flow.blockext.repository.CustomExtensionRepository;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,9 +40,21 @@ public class ExtensionService {
     }
 
     // 커스텀 확장자 추가
+    @Transactional
     public CustomExtension addCustomExtension(String name) {
-        CustomExtension ext = CustomExtension.builder().name(name).build();
-        return customExtensionRepository.save(ext);
+        if (customExtensionRepository.findByName(name).isPresent()) {
+            throw new IllegalArgumentException("이미 존재하는 확장자입니다.");
+        }
+        try {
+            CustomExtension ext = CustomExtension.builder().name(name).build();
+            return customExtensionRepository.save(ext);
+        } catch (DataIntegrityViolationException e) {
+            // Unique 제약조건 위반 (동시 insert 시)
+            throw new IllegalArgumentException("이미 존재하는 확장자입니다.");
+        } catch (ObjectOptimisticLockingFailureException e) {
+            // 낙관적 락 충돌
+            throw new RuntimeException("동시성 충돌이 발생했습니다. 다시 시도하세요.");
+        }
     }
 
     // 커스텀 확장자 삭제
