@@ -35,11 +35,17 @@
 - **다중/복합 확장자 체크**: 모든 확장자를 검사
 - **파일명에 확장자 없는 경우**: 확장자가 없는 파일 업로드 불가
 
+---
+
 ## 4. CI/CD 배포 자동화 (GitHub Actions)
 BlockExt 프로젝트는 **GitHub Actions**를 활용해 EC2 서버에 **자동 배포**되도록 설정했습니다.
 
+---
+
 ## 5. ERD
 <img width="382" height="142" alt="image" src="https://github.com/user-attachments/assets/cbe451c0-8cf2-41cd-8289-700f061d662c" />
+
+---
 
 ## 6. API 명세
 
@@ -57,4 +63,13 @@ BlockExt 프로젝트는 **GitHub Actions**를 활용해 EC2 서버에 **자동 
 | **GET**    | `/api/extensions/custom`             | 커스텀 확장자 전체 조회 | -            | `json [ { "name": "bat" }, { "name": "dll" } ] ` |
 | **POST**   | `/api/extensions/custom?name={name}` | 커스텀 확장자 추가    | `name`: 확장자명 | `json { "name": "bat" } `                        |
 | **DELETE** | `/api/extensions/custom/{name}`      | 커스텀 확장자 삭제    | `name`: 확장자명 | (응답 없음, 200 OK)                                  |
+| **DELETE** | `/api/extensions/custom`             | 커스텀 확장자 전체 삭제 | -            | (응답 없음, 200 OK)                                  |
+
+
+
+### 6.3 파일 업로드 API
+
+| 메서드      | 엔드포인트               | 설명                    | 요청 파라미터                                 | 응답 예시                                                                                                                    |
+| -------- | ------------------- | --------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| **POST** | `/api/files/upload` | 파일 업로드 (차단 확장자 검사 포함) | `file`: 업로드할 파일 (`multipart/form-data`) | **성공 시:**<br>`json "업로드 성공!" `<br><br>**실패 시:**<br>`json "확장자가 없는 파일은 첨부할 수 없습니다." `<br>`json "'exe' 확장자는 첨부할 수 없습니다." ` |
 
