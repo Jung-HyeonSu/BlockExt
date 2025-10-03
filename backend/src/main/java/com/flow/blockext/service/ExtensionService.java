@@ -48,6 +48,11 @@ public class ExtensionService {
         customExtensionRepository.delete(ext);
     }
 
+    // 커스텀 확장자 전체 삭제
+    public void deleteAllCustomExtensions() {
+        customExtensionRepository.deleteAll();
+    }
+
     // 차단된 확장자와 사용자 정의 확장자를 모두 조회하여 소문자 리스트로 반환
     public List<String> getBlockedExtensionNames() {
         List<String> fixed = fixedExtensionRepository.findAll()

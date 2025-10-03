@@ -31,3 +31,9 @@ export async function deleteCustomExtension(name: string) {
   const url = `${BASE_URL}/custom/${encodeURIComponent(name)}`;
   await fetch(url, { method: "DELETE" });
 }
+
+// 커스텀 확장자 전체 삭제
+export async function deleteAllCustomExtensions() {
+  const url = `${BASE_URL}/custom`;
+  await fetch(url, { method: "DELETE" });
+}

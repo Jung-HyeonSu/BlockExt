@@ -7,7 +7,8 @@ import {
   fetchCustomExtensions,
   setFixedBlocked,
   addCustomExtension,
-  deleteCustomExtension
+  deleteCustomExtension,
+  deleteAllCustomExtensions
 } from './api/extensionApi';
 
 const CUSTOM_EXT_MAX_LENGTH = 20;
@@ -18,10 +19,9 @@ function App() {
   const [fixedBlocked, setFixedBlockedState] = useState<{[name:string]: boolean}>({});
   const [customExts, setCustomExts] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [fileName, setFileName] = useState<string>('');
   const [uploadMsg, setUploadMsg] = useState<string>('');
 
-  // 차단된 확장자 목록(고정+커스텀)
+  // 차단된 확장자 목록 (고정 + 커스텀)
   const blockedExtensions = [
     ...fixedExts.filter(name => fixedBlocked[name]),
     ...customExts
@@ -30,15 +30,14 @@ function App() {
   useEffect(() => {
     fetchFixedExtensions().then((data) => {
       setFixedExts(data.map(item => item.name));
-      setFixedBlockedState(
-        Object.fromEntries(data.map(item => [item.name, item.blocked]))
-      );
+      setFixedBlockedState(Object.fromEntries(data.map(item => [item.name, item.blocked])));
     });
     fetchCustomExtensions().then((data) => {
       setCustomExts(data.map(item => item.name));
     });
   }, []);
 
+  // 고정 확장자 변경
   const handleFixedChange = async (selected: string[]) => {
     setLoading(true);
     for (const name of fixedExts) {
@@ -47,47 +46,51 @@ function App() {
         await setFixedBlocked(name, shouldBlock);
       }
     }
-    fetchFixedExtensions().then((data) => {
-      setFixedExts(data.map(item => item.name));
-      setFixedBlockedState(
-        Object.fromEntries(data.map(item => [item.name, item.blocked]))
-      );
-    });
+    const updated = await fetchFixedExtensions();
+    setFixedExts(updated.map(item => item.name));
+    setFixedBlockedState(Object.fromEntries(updated.map(item => [item.name, item.blocked])));
     setLoading(false);
   };
 
+  // 커스텀 확장자 추가
   const handleAddCustom = async (newExts: string[]) => {
     setLoading(true);
     const toAdd = newExts.filter(ext => !customExts.includes(ext));
     for (const ext of toAdd) {
       await addCustomExtension(ext);
     }
-    fetchCustomExtensions().then((data) => {
-      setCustomExts(data.map(item => item.name));
-    });
+    const updated = await fetchCustomExtensions();
+    setCustomExts(updated.map(item => item.name));
     setLoading(false);
   };
 
+  // 커스텀 확장자 삭제
   const handleRemoveCustom = async (toRemove: string) => {
     setLoading(true);
     await deleteCustomExtension(toRemove);
-    fetchCustomExtensions().then((data) => {
-      setCustomExts(data.map(item => item.name));
-    });
+    const updated = await fetchCustomExtensions();
+    setCustomExts(updated.map(item => item.name));
     setLoading(false);
   };
 
-  // 파일 첨부 테스트 핸들러
+  // 커스텀 확장자 전체 삭제
+  const handleRemoveAllCustom = async () => {
+    setLoading(true);
+    await deleteAllCustomExtensions();
+    setCustomExts([]);
+    setLoading(false);
+  };
+
+  // 파일 첨부 테스트
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
     const ext = file.name.split('.').pop()?.toLowerCase() || '';
-    setFileName(file.name);
 
     if (blockedExtensions.includes(ext)) {
       setUploadMsg(`'${ext}' 확장자는 첨부할 수 없습니다.`);
       alert(`'${ext}' 확장자는 첨부할 수 없습니다.`);
-      event.target.value = '';  // 첨부 취소
+      event.target.value = ''; // 첨부 취소
       return;
     }
     setUploadMsg(`파일 "${file.name}" 첨부 성공! (확장자: ${ext})`);
@@ -119,6 +122,7 @@ function App() {
                   extensions={customExts}
                   onChange={handleAddCustom}
                   onRemove={handleRemoveCustom}
+                  onRemoveAll={handleRemoveAllCustom}
                   maxLength={CUSTOM_EXT_MAX_LENGTH}
                   maxCount={CUSTOM_EXT_MAX_COUNT}
                   fixedExts={fixedExts}
@@ -128,9 +132,7 @@ function App() {
           </tbody>
         </table>
 
-        <div style={{
-          marginTop: '42px', padding: '20px 0 0 0', borderTop: '1px solid #ececec'
-        }}>
+        <div style={{ marginTop: '42px', padding: '20px 0 0 0', borderTop: '1px solid #ececec' }}>
           <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '10px', color: '#222' }}>
             파일 첨부 테스트
           </div>

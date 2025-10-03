@@ -62,4 +62,13 @@ public class ExtensionController {
     public void deleteCustom(@PathVariable String name) {
         extensionService.deleteCustomExtension(name);
     }
+
+    /**
+     * 사용자 정의 확장자 전체 삭제
+     * DELETE /api/extensions/custom
+     */
+    @DeleteMapping("/custom")
+    public void deleteAllCustom() {
+        extensionService.deleteAllCustomExtensions();
+    }
 }
