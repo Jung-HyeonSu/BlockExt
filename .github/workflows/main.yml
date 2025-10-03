@@ -3,7 +3,7 @@ name: Deploy BlockExt to EC2
 on:
   push:
     branches:
-      - main   # main 브랜치 푸시 시 실행
+      - main
 
 jobs:
   deploy:
@@ -13,15 +13,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Copy project to EC2
-        uses: appleboy/scp-action@v0.1.4
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: "."
-          target: "/home/ec2-user/blockext"
-
       - name: Deploy on EC2
         uses: appleboy/ssh-action@v0.1.6
         with:
@@ -29,14 +20,29 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            # 루트 디렉터리 설정
+            ROOT_DIR="/home/ec2-user/blockext/BlockExt"
+            BACKEND_DIR="$ROOT_DIR/backend"
+            FRONTEND_DIR="$ROOT_DIR/frontend"
+
+            echo "=== BlockExt 배포 시작 ==="
+
+            # 최신 코드 가져오기
+            cd $ROOT_DIR
+            git fetch --all
+            git reset --hard
+            git pull origin main
+
             # 백엔드 빌드 및 서비스 재시작
-            cd /home/ec2-user/blockext/BlockExt/backend
+            cd $BACKEND_DIR
             chmod +x gradlew
-            ./gradlew build -x test
+            ./gradlew clean build -x test
             sudo systemctl restart backend
 
             # 프론트엔드 빌드 및 서비스 재시작
-            cd /home/ec2-user/blockext/BlockExt/frontend
+            cd $FRONTEND_DIR
             npm install
             npm run build
             sudo systemctl restart frontend
+
+            echo "=== BlockExt 배포 완료 ==="
