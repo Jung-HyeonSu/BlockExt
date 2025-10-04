@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8080/api/extensions";
+const BASE_URL = "http://3.36.89.98:8080/api/extensions";
 
 // 고정 확장자 전체 조회
 export async function fetchFixedExtensions(): Promise<{name:string, blocked:boolean}[]> {
@@ -34,6 +34,6 @@ export async function deleteCustomExtension(name: string) {
 
 // 커스텀 확장자 전체 삭제
 export async function deleteAllCustomExtensions() {
-  const url = `${BASE_URL}/custom/all`;
+  const url = `${BASE_URL}/custom_all`;
   await fetch(url, { method: "DELETE" });
 }
