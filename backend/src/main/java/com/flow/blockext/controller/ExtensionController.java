@@ -14,6 +14,10 @@ import java.util.List;
 public class ExtensionController {
     private final ExtensionService extensionService;
 
+    @RequestMapping(method = RequestMethod.OPTIONS, path = "/custom")
+    public void handleOptions() {
+    }
+
     /**
      * 고정 확장자 전체 조회
      * GET /api/extensions/fixed
