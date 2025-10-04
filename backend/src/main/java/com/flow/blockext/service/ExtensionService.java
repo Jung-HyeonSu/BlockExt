@@ -82,9 +82,12 @@ public class ExtensionService {
     }
 
     // 커스텀 확장자 전체 삭제
+    @Transactional
     public void deleteAllCustomExtensions() {
-        customExtensionRepository.deleteAll();
+        // @Version이 있을 때는 deleteAllInBatch()를 사용
+        customExtensionRepository.deleteAllInBatch();
     }
+
 
     // 차단된 확장자와 사용자 정의 확장자를 모두 조회하여 소문자 리스트로 반환
     public List<String> getBlockedExtensionNames() {
