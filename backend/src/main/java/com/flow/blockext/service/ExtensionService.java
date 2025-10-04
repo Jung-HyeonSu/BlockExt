@@ -84,8 +84,7 @@ public class ExtensionService {
     // 커스텀 확장자 전체 삭제
     @Transactional
     public void deleteAllCustomExtensions() {
-        // @Version이 있을 때는 deleteAllInBatch()를 사용
-        customExtensionRepository.deleteAllInBatch();
+        customExtensionRepository.deleteAll();
     }
 
 
