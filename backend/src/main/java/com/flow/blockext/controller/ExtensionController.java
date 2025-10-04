@@ -64,9 +64,9 @@ public class ExtensionController {
 
     /**
      * 사용자 정의 확장자 전체 삭제
-     * DELETE /api/extensions/custom/all
+     * DELETE /api/extensions/custom_all
      */
-    @DeleteMapping("/custom/all")
+    @DeleteMapping("/custom_all")
     public void deleteAllCustom() {
         extensionService.deleteAllCustomExtensions();
     }
