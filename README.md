@@ -118,7 +118,7 @@ BlockExt 프로젝트는 **GitHub Actions**를 활용해 EC2 서버에 **자동 
 | **GET**    | `/api/extensions/custom`             | 커스텀 확장자 전체 조회 | -            | `json [ { "name": "bat" }, { "name": "dll" } ] ` |
 | **POST**   | `/api/extensions/custom?name={name}` | 커스텀 확장자 추가    | `name`: 확장자명 | `json { "name": "bat" } `                        |
 | **DELETE** | `/api/extensions/custom/{name}`      | 커스텀 확장자 삭제    | `name`: 확장자명 | (응답 없음, 200 OK)                                  |
-| **DELETE** | `/api/extensions/custom`             | 커스텀 확장자 전체 삭제 | -            | (응답 없음, 200 OK)                                  |
+| **DELETE** | `/api/extensions/custom/all`             | 커스텀 확장자 전체 삭제 | -            | (응답 없음, 200 OK)                                  |
 
 
 
