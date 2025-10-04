@@ -13,11 +13,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ExtensionController {
     private final ExtensionService extensionService;
-
-    @RequestMapping(method = RequestMethod.OPTIONS, path = "/custom")
-    public void handleOptions() {
-    }
-
     /**
      * 고정 확장자 전체 조회
      * GET /api/extensions/fixed
@@ -69,9 +64,9 @@ public class ExtensionController {
 
     /**
      * 사용자 정의 확장자 전체 삭제
-     * DELETE /api/extensions/custom
+     * DELETE /api/extensions/custom/all
      */
-    @DeleteMapping("/custom")
+    @DeleteMapping("/custom/all")
     public void deleteAllCustom() {
         extensionService.deleteAllCustomExtensions();
     }
